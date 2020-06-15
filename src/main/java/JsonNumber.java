@@ -23,27 +23,27 @@ public class JsonNumber extends JsonItem {
         }
     }
 
-    public short toShort() {
+    public short getShort() {
         cn();
         return (short) (value);
     }
 
-    public int toInt() {
+    public int getInt() {
         cn();
         return (int) (value);
     }
 
-    public long toLong() {
+    public long getLong() {
         cn();
         return (long) (value);
     }
 
-    public float toFloat() {
+    public float getFloat() {
         cn();
         return (float) (value);
     }
 
-    public double toDouble() {
+    public double getDouble() {
         cn();
         return (double) (value);
     }
@@ -68,7 +68,7 @@ public class JsonNumber extends JsonItem {
         value = val;
     }
 
-    String toStrX() {
+    String toStr() {
         cn();
         Boolean v = m.get(value.getClass().hashCode());
         if (v == null || !v) {

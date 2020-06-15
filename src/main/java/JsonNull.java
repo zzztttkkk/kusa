@@ -5,7 +5,7 @@ public final class JsonNull extends JsonItem {
         type = Types.Nil;
     }
 
-    static JsonNull Null() {
+    public static JsonNull getInstance() {
         return nil;
     }
 }

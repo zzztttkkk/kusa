@@ -1,6 +1,5 @@
 import exceptions.ParseException;
 
-import java.nio.CharBuffer;
 import java.util.*;
 
 public class Decoder {
@@ -238,7 +237,7 @@ public class Decoder {
             JsonItem top = stack.peek();
             switch (top.type) {
                 case Ary -> {
-                    top.toArray().add(item);
+                    top.Array().add(item);
                     expect = ',';
                     expectValue = true;
                 }
@@ -249,7 +248,7 @@ public class Decoder {
                     }
                     expect = 0;
                     keyValid = false;
-                    top.toObject().put(key, item);
+                    top.Object().put(key, item);
                 }
                 default -> {
                     te();
@@ -502,7 +501,7 @@ public class Decoder {
                     te();
                     return;
                 }
-                appendItem(JsonNull.Null());
+                appendItem(JsonNull.nil);
                 length = 0;
             }
             default -> {
@@ -559,5 +558,31 @@ public class Decoder {
         eed = false;
         length = 0;
         pointed = false;
+    }
+
+    public JsonItem getResult() {
+        return result;
+    }
+
+    public void reset() {
+        done = false;
+        inString = false;
+        inEscape = false;
+        buffer.setLength(0);
+        stack.clear();
+        result = null;
+        keyValid = false;
+        key = "";
+        expect = 0;
+        expectValue = false;
+        length = 0;
+        status = 0;
+        signed = false;
+        pointed = false;
+        eed = false;
+        passASep = false;
+        ustatus = -1;
+        ecq.clear();
+        ebuilder.setLength(0);
     }
 }

@@ -93,16 +93,15 @@ public class Encoder {
         }
     }
 
-    @SuppressWarnings("ConstantConditions")
     public void encode(JsonItem item) {
-        int ind = 0;
-        int last = 0;
+        int ind;
+        int last;
 
         switch (item.type) {
             case Obj -> {
                 write('{');
 
-                HashMap<String, JsonItem> m = item.toObject().expose();
+                HashMap<String, JsonItem> m = item.Object().expose();
                 if (m == null) {
                     throw new ValueException();
                 }
@@ -133,7 +132,7 @@ public class Encoder {
             case Ary -> {
                 write('[');
 
-                ArrayList<JsonItem> l = item.toArray().expose();
+                ArrayList<JsonItem> l = item.Array().expose();
                 if (l == null) {
                     throw new ValueException();
                 }
@@ -150,26 +149,20 @@ public class Encoder {
                 write(']');
             }
             case Bol -> {
-                if (item == JsonItem.True()) {
+                if (item.Boolean().isTrue()) {
                     writeTrue();
-                } else if (item == JsonItem.False()) {
-                    writeFalse();
                 } else {
-                    throw new ValueException();
+                    writeFalse();
                 }
             }
             case Nil -> {
-                if (item == JsonItem.Null()) {
-                    writeNull();
-                } else {
-                    throw new ValueException();
-                }
+                writeNull();
             }
             case Str -> {
-                print(item.toStr().toString());
+                print(item.String().getString());
             }
             case Num -> {
-                writer.print(item.toNumber().toStrX());
+                writer.print(item.Number().toStr());
                 ce();
             }
         }

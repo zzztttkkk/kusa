@@ -11,5 +11,19 @@ public final class JsonBoolean extends JsonItem {
         type = Types.Bol;
     }
 
+    public boolean isTrue() {
+        return this == T;
+    }
 
+    public boolean isFalse() {
+        return this != T;
+    }
+
+    public static JsonBoolean False() {
+        return F;
+    }
+
+    public static JsonBoolean True() {
+        return T;
+    }
 }
