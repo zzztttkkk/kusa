@@ -1,5 +1,5 @@
 import exceptions.TypeCastException;
-import exceptions.ValueException;
+import exceptions.NullValueException;
 
 public class JsonItem {
     Types type;
@@ -52,7 +52,7 @@ public class JsonItem {
 
     void notNullValue() {
         if (value == null) {
-            throw new ValueException();
+            throw new NullValueException();
         }
     }
 }

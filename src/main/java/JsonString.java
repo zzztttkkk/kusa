@@ -1,4 +1,4 @@
-import exceptions.ValueException;
+import exceptions.NullValueException;
 
 public class JsonString extends JsonItem {
     JsonString() {
@@ -17,7 +17,7 @@ public class JsonString extends JsonItem {
 
     public String get() {
         if (value == null) {
-            throw new ValueException();
+            throw new NullValueException();
         }
         return (String) (value);
     }

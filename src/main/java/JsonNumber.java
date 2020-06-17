@@ -1,5 +1,3 @@
-import exceptions.ValueException;
-
 public class JsonNumber extends JsonItem {
     private boolean isfloat;
 

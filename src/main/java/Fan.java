@@ -1,4 +1,4 @@
-import exceptions.ClassException;
+import exceptions.FieldException;
 
 import java.lang.reflect.Field;
 
@@ -6,6 +6,7 @@ class Fan {
     Field raw;
     String name;
     String alias;
+    String clsName;
 
     Fan(Field field) {
         raw = field;
@@ -25,7 +26,7 @@ class Fan {
         try {
             return raw.get(obj);
         } catch (IllegalAccessException e) {
-            throw new ClassException();
+            throw new FieldException(clsName, name);
         }
     }
 
@@ -33,7 +34,7 @@ class Fan {
         try {
             raw.set(ele, value);
         } catch (IllegalAccessException e) {
-            throw new ClassException();
+            throw new FieldException(clsName, name);
         }
     }
 }

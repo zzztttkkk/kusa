@@ -6,48 +6,38 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 class reflect {
-    static final HashSet<String> whiteLst = new HashSet<>();
-    static final HashSet<String> blackLst = new HashSet<>();
-    static final HashMap<String, Class<?>> clzMap = new HashMap<>();
-    static final HashMap<String, ArrayList<Fan>> fieldMap = new HashMap<>();
+    static final HashSet<Class<?>> whiteLst = new HashSet<>();
+    static final HashSet<Class<?>> blackLst = new HashSet<>();
+    static final HashMap<Class<?>, ArrayList<Fan>> fieldMap = new HashMap<>();
 
     static {
-        whiteLst.add(Object.class.getName());
+        whiteLst.add(Object.class);
+        whiteLst.add(Short.class);
+        whiteLst.add(Integer.class);
+        whiteLst.add(Long.class);
+        whiteLst.add(Double.class);
+        whiteLst.add(Float.class);
+        whiteLst.add(Boolean.class);
 
-        whiteLst.add(Short.class.getName());
-        whiteLst.add(Integer.class.getName());
-        whiteLst.add(Long.class.getName());
-        whiteLst.add(Double.class.getName());
-        whiteLst.add(Float.class.getName());
-        whiteLst.add(Boolean.class.getName());
+        whiteLst.add(String.class);
 
-        whiteLst.add(String.class.getName());
-
-        whiteLst.add(HashMap.class.getName());
-        whiteLst.add(ArrayList.class.getName());
+        whiteLst.add(HashMap.class);
+        whiteLst.add(ArrayList.class);
     }
 
-    static Class<?> getClass(String name) {
-        if (blackLst.contains(name)) {
-            throw new ClassException();
+    static void isValid(Class<?> cls) {
+        if (blackLst.contains(cls)) {
+            throw new ClassException(cls.getName());
         }
-
-        Class<?> cls;
-        try {
-            cls = Class.forName(name);
-        } catch (ClassNotFoundException e) {
-            throw new ClassException();
-        }
-
-        if (!whiteLst.contains(name)) {
+        if (!whiteLst.contains(cls)) {
             JsonReflectSafe safe = cls.getAnnotation(JsonReflectSafe.class);
             if (safe == null) {
-                blackLst.add(name);
-                throw new ClassException();
+                blackLst.add(cls);
+                System.out.println(cls);
+                throw new ClassException(cls.getName());
             }
-            whiteLst.add(name);
+            whiteLst.add(cls);
         }
-        return cls;
     }
 
     static void doGetFields(Class<?> cls, ArrayList<Fan> lst) {
@@ -58,6 +48,7 @@ class reflect {
             }
 
             Fan f = new Fan(field);
+            f.clsName = cls.getName();
             if (alias != null) {
                 f.alias = alias.value();
             }
@@ -68,22 +59,19 @@ class reflect {
         if (sc == null || sc == Object.class) {
             return;
         }
-        Class<?> scls = getClass(sc.getName());
-        doGetFields(scls, lst);
+        isValid(sc);
+        doGetFields(sc, lst);
     }
 
-    static ArrayList<Fan> getFields(String name) {
-        ArrayList<Fan> lst = fieldMap.get(name);
+    static ArrayList<Fan> getFields(Class<?> cls) {
+        ArrayList<Fan> lst = fieldMap.get(cls);
         if (lst != null) {
             return lst;
         }
-
-        Class<?> cls = getClass(name);
+        isValid(cls);
         lst = new ArrayList<>();
         doGetFields(cls, lst);
-
-        fieldMap.put(name, lst);
-
+        fieldMap.put(cls, lst);
         return lst;
     }
 }

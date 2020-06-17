@@ -1,7 +1,6 @@
-import exceptions.ValueException;
+import exceptions.NullValueException;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 class Encoder {
@@ -20,16 +19,16 @@ class Encoder {
         Null = "null".toCharArray();
     }
 
-    private final OutputStreamWriter writer;
+    private final Writer writer;
     private final boolean sortKey;
 
-    Encoder(OutputStream ostream) {
-        this.writer = new OutputStreamWriter(ostream, StandardCharsets.UTF_8);
+    Encoder(Writer writer) {
+        this.writer = writer;
         sortKey = false;
     }
 
-    Encoder(OutputStream ostream, boolean sortKey) {
-        this.writer = new OutputStreamWriter(ostream, StandardCharsets.UTF_8);
+    Encoder(Writer writer, boolean sortKey) {
+        this.writer = writer;
         this.sortKey = sortKey;
     }
 
@@ -74,7 +73,7 @@ class Encoder {
 
                 HashMap<String, JsonItem> m = item.Object().expose();
                 if (m == null) {
-                    throw new ValueException();
+                    throw new NullValueException();
                 }
 
                 Collection<String> keys;
@@ -105,7 +104,7 @@ class Encoder {
 
                 ArrayList<JsonItem> l = item.Array().expose();
                 if (l == null) {
-                    throw new ValueException();
+                    throw new NullValueException();
                 }
 
                 ind = 0;
@@ -138,13 +137,15 @@ class Encoder {
         }
     }
 
-    public void flush() throws IOException {
+    void flush() throws IOException {
         writer.flush();
     }
 
-    static String stringify(JsonItem item) {
+    static String stringify(JsonItem item, boolean sortKey) {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
-        Encoder encoder = new Encoder(os);
+        OutputStreamWriter writer = new OutputStreamWriter(os);
+
+        Encoder encoder = new Encoder(writer, sortKey);
         try {
             encoder.encode(item);
             encoder.flush();
