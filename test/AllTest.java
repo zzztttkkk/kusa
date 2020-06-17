@@ -7,8 +7,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
 class AllTest {
-
-
     @org.junit.jupiter.api.Test
     void utf8() throws IOException {
         OutputStream os = new OutputStream() {

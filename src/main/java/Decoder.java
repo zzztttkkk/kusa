@@ -36,12 +36,12 @@ class Decoder {
     boolean expectValue;
 
     // number, null, true, false
-    char[] val;
-    int length;
-    int status;
-    boolean signed;
-    boolean pointed;
-    boolean eed;
+    char[] vBuf;
+    int vLength;
+    int vStatus;
+    boolean vSigned;
+    boolean vPointed;
+    boolean vEed;
 
     // sep ,
     boolean passASep;
@@ -57,7 +57,8 @@ class Decoder {
     Decoder() {
         buffer = new StringBuilder();
         stack = new Stack<>();
-        val = new char[30];
+        vStatus = -1;
+        vBuf = new char[30];
         ustatus = -1;
         ucache = new char[4];
         ecq = new LinkedList<>();
@@ -72,7 +73,7 @@ class Decoder {
         return wsChMap[ch];
     }
 
-    void te() {
+    void exit() {
         ebuilder.setLength(0);
         for (char ch : ecq) {
             ebuilder.append(ch);
@@ -91,14 +92,14 @@ class Decoder {
         }
 
         if (done) {
-            te();
+            exit();
             return;
         }
 
         if (inString) {
             if (ustatus > -1) {
                 if (!hexChMap[ch]) {
-                    te();
+                    exit();
                     return;
                 }
                 ucache[ustatus] = ch;
@@ -107,7 +108,7 @@ class Decoder {
                     ustatus = -1;
                     int iv = Integer.parseInt(String.valueOf(ucache), 16);
                     if (iv > 65535) {
-                        te();
+                        exit();
                         return;
                     }
 
@@ -145,11 +146,11 @@ class Decoder {
         if (expect != 0) {
             if (expect != ch) {
                 if (expect != ',') {
-                    te();
+                    exit();
                     return;
                 } else {
                     if (ch != ']' && ch != '}') {
-                        te();
+                        exit();
                         return;
                     }
                 }
@@ -198,7 +199,7 @@ class Decoder {
             }
             default -> {
                 if (!expectValue) {
-                    te();
+                    exit();
                     return;
                 }
                 writeValue(ch);
@@ -244,7 +245,7 @@ class Decoder {
                 }
                 case Obj -> {
                     if (!keyValid) {
-                        te();
+                        exit();
                         return;
                     }
                     expect = 0;
@@ -252,7 +253,7 @@ class Decoder {
                     top.Object().put(key, item);
                 }
                 default -> {
-                    te();
+                    exit();
                     return;
                 }
             }
@@ -294,7 +295,7 @@ class Decoder {
     void onObjEnd() {
         endNumber();
         if (passASep) {
-            te();
+            exit();
             return;
         }
 
@@ -319,7 +320,7 @@ class Decoder {
     void onAryEnd() {
         endNumber();
         if (passASep) {
-            te();
+            exit();
             return;
         }
 
@@ -347,14 +348,14 @@ class Decoder {
     }
 
     void endNumber() {
-        if (status != 3 || length == 0) {
+        if (vStatus != 3 || vLength == 0) {
             return;
         }
 
-        String $ = String.copyValueOf(val, 0, length);
+        String $ = String.copyValueOf(vBuf, 0, vLength);
 
         try {
-            if ($.contains(".")) {
+            if (vPointed) {
                 double v = Double.parseDouble($);
                 JsonItem item = new JsonNumber(true);
                 item.value = v;
@@ -366,7 +367,7 @@ class Decoder {
                 appendItem(item);
             }
         } catch (NumberFormatException exp) {
-            te();
+            exit();
             return;
         }
         expect = 0;
@@ -374,29 +375,29 @@ class Decoder {
     }
 
     void writeValue(char ch) {
-        if (length == 0) {
+        if (vLength == 0) {
             switch (ch) {
                 case 't' -> {
-                    status = 0;
-                    length++;
+                    vStatus = 0;
+                    vLength++;
                 }
                 case 'f' -> {
-                    status = 1;
-                    length++;
+                    vStatus = 1;
+                    vLength++;
                 }
                 case 'n' -> {
-                    status = 2;
-                    length++;
+                    vStatus = 2;
+                    vLength++;
                 }
                 default -> {
-                    status = 3;
+                    vStatus = 3;
                     writeNumber(ch);
                 }
             }
             return;
         }
 
-        switch (status) {
+        switch (vStatus) {
             case 0 -> {
                 writeTrue(ch);
             }
@@ -413,106 +414,106 @@ class Decoder {
     }
 
     void writeTrue(char ch) {
-        switch (length) {
+        switch (vLength) {
             case 1 -> {
                 if (ch != 'r') {
-                    te();
+                    exit();
                     return;
                 }
-                length++;
+                vLength++;
             }
             case 2 -> {
                 if (ch != 'u') {
-                    te();
+                    exit();
                     return;
                 }
-                length++;
+                vLength++;
             }
             case 3 -> {
                 if (ch != 'e') {
-                    te();
+                    exit();
                     return;
                 }
                 appendItem(JsonBoolean.True());
-                length = 0;
+                vLength = 0;
             }
             default -> {
-                te();
+                exit();
             }
         }
     }
 
     void writeFalse(char ch) {
-        switch (length) {
+        switch (vLength) {
             case 1 -> {
                 if (ch != 'a') {
-                    te();
+                    exit();
                     return;
                 }
-                length++;
+                vLength++;
             }
             case 2 -> {
                 if (ch != 'l') {
-                    te();
+                    exit();
                     return;
                 }
-                length++;
+                vLength++;
             }
             case 3 -> {
                 if (ch != 's') {
-                    te();
+                    exit();
                     return;
                 }
-                length++;
+                vLength++;
             }
             case 4 -> {
                 if (ch != 'e') {
-                    te();
+                    exit();
                     return;
                 }
                 appendItem(JsonBoolean.False());
-                length = 0;
+                vLength = 0;
             }
             default -> {
-                te();
+                exit();
             }
         }
     }
 
     void writeNull(char ch) {
-        switch (length) {
+        switch (vLength) {
             case 1 -> {
                 if (ch != 'u') {
-                    te();
+                    exit();
                     return;
                 }
-                length++;
+                vLength++;
             }
             case 2 -> {
                 if (ch != 'l') {
-                    te();
+                    exit();
                     return;
                 }
-                length++;
+                vLength++;
             }
             case 3 -> {
                 if (ch != 'l') {
-                    te();
+                    exit();
                     return;
                 }
                 appendItem(JsonNull.nil);
-                length = 0;
+                vLength = 0;
             }
             default -> {
-                te();
+                exit();
             }
         }
     }
 
     void writeNumber(char ch) {
-        if (ch > 127 || !numChMap[ch] || length >= 26) {
-            if (length == 0 || length >= 26) {
-                te();
+        if (ch > 127 || !numChMap[ch] || vLength >= 26) {
+            if (vLength == 0 || vLength >= 26) {
+                exit();
                 return;
             }
 
@@ -524,39 +525,40 @@ class Decoder {
 
         switch (ch) {
             case '.' -> {
-                if (!pointed) {
-                    pointed = true;
+                if (!vPointed) {
+                    vPointed = true;
                 } else {
-                    te();
+                    exit();
                     return;
                 }
             }
             case 'e', 'E' -> {
-                if (!eed) {
-                    eed = true;
+                if (!vEed) {
+                    vEed = true;
                 } else {
-                    te();
+                    exit();
                     return;
                 }
             }
             case '-', '+' -> {
-                if (!signed) {
-                    signed = true;
-                } else {
-                    te();
+                if (vLength != 0 || vSigned) {
+                    exit();
+                    return;
                 }
+                vSigned = true;
             }
         }
 
-        val[length] = ch;
-        length++;
+        vBuf[vLength] = ch;
+        vLength++;
     }
 
     void resetVal() {
-        signed = false;
-        eed = false;
-        length = 0;
-        pointed = false;
+        vStatus = -1;
+        vSigned = false;
+        vEed = false;
+        vLength = 0;
+        vPointed = false;
     }
 
     JsonItem getResult() {
@@ -577,11 +579,11 @@ class Decoder {
         key = "";
         expect = 0;
         expectValue = true;
-        length = 0;
-        status = 0;
-        signed = false;
-        pointed = false;
-        eed = false;
+        vLength = 0;
+        vStatus = 0;
+        vSigned = false;
+        vPointed = false;
+        vEed = false;
         passASep = false;
         ustatus = -1;
         ecq.clear();
