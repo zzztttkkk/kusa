@@ -1,5 +1,3 @@
-import java.util.Date;
-
 public class SerializationTest {
     @org.junit.jupiter.api.Test
     void getFans() {
@@ -11,11 +9,7 @@ public class SerializationTest {
     @org.junit.jupiter.api.Test
     void toJson() {
         User tue = new User("tue我");
-        System.out.println(API.serialize(tue));
-
-        System.out.println(API.serialize("🎆🎇🧨🎈"));
-        System.out.println(Types.Ary.getClass());
-        System.out.println(new Date().getTime());
-        System.out.println(Date.class.getName());
+        System.out.println(Kusa.serialize(tue));
+        System.out.println(Kusa.serialize("🎆🎇🧨🎈"));
     }
 }

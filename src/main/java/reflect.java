@@ -10,21 +10,6 @@ class reflect {
     static final HashSet<Class<?>> blackLst = new HashSet<>();
     static final HashMap<Class<?>, ArrayList<Fan>> fieldMap = new HashMap<>();
 
-    static {
-        whiteLst.add(Object.class);
-        whiteLst.add(Short.class);
-        whiteLst.add(Integer.class);
-        whiteLst.add(Long.class);
-        whiteLst.add(Double.class);
-        whiteLst.add(Float.class);
-        whiteLst.add(Boolean.class);
-
-        whiteLst.add(String.class);
-
-        whiteLst.add(HashMap.class);
-        whiteLst.add(ArrayList.class);
-    }
-
     static void isValid(Class<?> cls) {
         if (blackLst.contains(cls)) {
             throw new ClassException(cls.getName());

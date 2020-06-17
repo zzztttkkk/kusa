@@ -29,19 +29,19 @@ class AllTest {
 
     @org.junit.jupiter.api.Test
     void decodeString() {
-        JsonItem item = API.parse("12");
+        JsonItem item = Kusa.parse("12");
         System.out.println(item.Number().getLong());
 
-        item = API.parse("[[[[[[]]]]], 1, true, 1.23]");
+        item = Kusa.parse("[[[[[[]]]]], 1, true, 1.23]");
         System.out.println(item.Array().expose());
 
-        item = API.parse("\"甜辣酱\u0048\"");
+        item = Kusa.parse("\"甜辣酱\u0048\"");
         System.out.println(item.String().get());
 
-        item = API.parse("null");
+        item = Kusa.parse("null");
         System.out.println(item.Null());
 
-        item = API.parse("{}");
+        item = Kusa.parse("{}");
         System.out.println(item.Object().expose());
     }
 

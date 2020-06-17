@@ -1,10 +1,9 @@
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
 
-public class API {
-    private API() {
+public class Kusa {
+    private Kusa() {
     }
 
     public static JsonItem parse(String text) {
