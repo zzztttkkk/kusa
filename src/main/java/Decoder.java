@@ -2,7 +2,7 @@ import exceptions.ParseException;
 
 import java.util.*;
 
-public class Decoder {
+class Decoder {
     static boolean[] numChMap = new boolean[127];
     static boolean[] wsChMap = new boolean[127];
     static boolean[] hexChMap = new boolean[127];
@@ -54,7 +54,7 @@ public class Decoder {
     LinkedList<Character> ecq;
     StringBuilder ebuilder;
 
-    public Decoder() {
+    Decoder() {
         buffer = new StringBuilder();
         stack = new Stack<>();
         val = new char[30];
@@ -62,6 +62,7 @@ public class Decoder {
         ucache = new char[4];
         ecq = new LinkedList<>();
         ebuilder = new StringBuilder();
+        expectValue = true;
     }
 
     boolean isSpace(char ch) {
@@ -79,7 +80,7 @@ public class Decoder {
         throw new ParseException(ebuilder.toString());
     }
 
-    public void feed(char ch) {
+    void feed(char ch) {
         ecq.add(ch);
         if (ecq.size() > 40) {
             ecq.pollFirst();
@@ -287,7 +288,6 @@ public class Decoder {
 
     void onObjBegin() {
         JsonItem item = new JsonObject();
-        item.value = new HashMap<String, JsonItem>();
         appendItem(item);
     }
 
@@ -313,7 +313,6 @@ public class Decoder {
 
     void onAryBegin() {
         JsonItem item = new JsonArray();
-        item.value = new ArrayList<JsonItem>();
         appendItem(item);
     }
 
@@ -357,12 +356,12 @@ public class Decoder {
         try {
             if ($.contains(".")) {
                 double v = Double.parseDouble($);
-                JsonItem item = new JsonNumber();
+                JsonItem item = new JsonNumber(true);
                 item.value = v;
                 appendItem(item);
             } else {
                 long v = Long.parseLong($);
-                JsonItem item = new JsonNumber();
+                JsonItem item = new JsonNumber(false);
                 item.value = v;
                 appendItem(item);
             }
@@ -560,11 +559,14 @@ public class Decoder {
         pointed = false;
     }
 
-    public JsonItem getResult() {
+    JsonItem getResult() {
+        if (!done) {
+            endNumber();
+        }
         return result;
     }
 
-    public void reset() {
+    void reset() {
         done = false;
         inString = false;
         inEscape = false;
@@ -574,7 +576,7 @@ public class Decoder {
         keyValid = false;
         key = "";
         expect = 0;
-        expectValue = false;
+        expectValue = true;
         length = 0;
         status = 0;
         signed = false;
@@ -584,5 +586,13 @@ public class Decoder {
         ustatus = -1;
         ecq.clear();
         ebuilder.setLength(0);
+    }
+
+    static JsonItem decode(String text) {
+        Decoder decoder = new Decoder();
+        for (char ch : text.toCharArray()) {
+            decoder.feed(ch);
+        }
+        return decoder.getResult();
     }
 }

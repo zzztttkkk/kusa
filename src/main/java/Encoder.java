@@ -1,99 +1,70 @@
-import exceptions.EncodeException;
 import exceptions.ValueException;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-public class Encoder {
+class Encoder {
     private static final boolean[] escapeMap = new boolean[127];
-    private static final byte[] True;
-    private static final byte[] False;
-    private static final byte[] Null;
+    private static final char[] True;
+    private static final char[] False;
+    private static final char[] Null;
 
     static {
-        for (char ch : "\n\t\r\\\b\f\"".toCharArray()) {
+        for (char ch : "\\\"".toCharArray()) {
             escapeMap[ch] = true;
         }
 
-        True = "true".getBytes();
-        False = "false".getBytes();
-        Null = "null".getBytes();
+        True = "true".toCharArray();
+        False = "false".toCharArray();
+        Null = "null".toCharArray();
     }
 
-    private final PrintStream writer;
+    private final OutputStreamWriter writer;
     private final boolean sortKey;
-    private final StringBuilder builder;
 
-    public Encoder(OutputStream writer) {
-        this.writer = new PrintStream(writer);
+    Encoder(OutputStream ostream) {
+        this.writer = new OutputStreamWriter(ostream, StandardCharsets.UTF_8);
         sortKey = false;
-        builder = new StringBuilder();
     }
 
-    public Encoder(OutputStream writer, boolean sortKey) {
-        this.writer = new PrintStream(writer);
+    Encoder(OutputStream ostream, boolean sortKey) {
+        this.writer = new OutputStreamWriter(ostream, StandardCharsets.UTF_8);
         this.sortKey = sortKey;
-        builder = new StringBuilder();
     }
 
-    public String escape(String raw) {
-        builder.setLength(0);
-
+    void escape(String raw) throws IOException {
         for (char ch : raw.toCharArray()) {
             if (ch <= 127 && escapeMap[ch]) {
-                builder.append('\n');
+                writer.write('\\');
             }
-            builder.append(ch);
-        }
-
-        return builder.toString();
-    }
-
-    void ce() {
-        if (writer.checkError()) {
-            throw new EncodeException();
+            writer.write(ch);
         }
     }
 
-    void write(char b) {
+    void write(char b) throws IOException {
         writer.write(b);
-        ce();
     }
 
-    void print(String str) {
+    void print(String str) throws IOException {
         writer.write('"');
-        writer.print(escape(str));
+        escape(str);
         writer.write('"');
-        ce();
     }
 
-    void writeTrue() {
-        try {
-            writer.write(True);
-        } catch (IOException exception) {
-            throw new EncodeException();
-        }
+    void writeTrue() throws IOException {
+        writer.write(True);
     }
 
-    void writeFalse() {
-        try {
-            writer.write(False);
-        } catch (IOException exception) {
-            throw new EncodeException();
-        }
+    void writeFalse() throws IOException {
+        writer.write(False);
     }
 
-    void writeNull() {
-        try {
-            writer.write(Null);
-        } catch (IOException exception) {
-            throw new EncodeException();
-        }
+    void writeNull() throws IOException {
+        writer.write(Null);
     }
 
-    public void encode(JsonItem item) {
+    void encode(JsonItem item) throws IOException {
         int ind;
         int last;
 
@@ -159,12 +130,26 @@ public class Encoder {
                 writeNull();
             }
             case Str -> {
-                print(item.String().getString());
+                print(item.String().get());
             }
             case Num -> {
-                writer.print(item.Number().toStr());
-                ce();
+                writer.write(item.Number().toJson());
             }
         }
+    }
+
+    public void flush() throws IOException {
+        writer.flush();
+    }
+
+    static String stringify(JsonItem item) {
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        Encoder encoder = new Encoder(os);
+        try {
+            encoder.encode(item);
+            encoder.flush();
+        } catch (IOException ignored) {
+        }
+        return os.toString();
     }
 }

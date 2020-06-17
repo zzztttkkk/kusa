@@ -1,4 +1,5 @@
 import exceptions.TypeCastException;
+import exceptions.ValueException;
 
 public class JsonItem {
     Types type;
@@ -47,5 +48,11 @@ public class JsonItem {
             throw new TypeCastException();
         }
         return (JsonString) (this);
+    }
+
+    void notNullValue() {
+        if (value == null) {
+            throw new ValueException();
+        }
     }
 }

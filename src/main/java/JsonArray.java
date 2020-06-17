@@ -2,8 +2,9 @@ import java.util.ArrayList;
 
 @SuppressWarnings("unchecked")
 public class JsonArray extends JsonItem {
-    JsonArray() {
+    public JsonArray() {
         type = Types.Ary;
+        value = new ArrayList<JsonItem>();
     }
 
     public void add(JsonItem item) {

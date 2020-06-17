@@ -1,66 +1,39 @@
 import exceptions.ValueException;
 
-import java.util.HashMap;
-
 public class JsonNumber extends JsonItem {
-    static final HashMap<Integer, Boolean> m = new HashMap<>();
+    private boolean isfloat;
 
-    static {
-        m.put(((Object) (Short.parseShort("0"))).getClass().hashCode(), true);
-        m.put(((Object) (Integer.parseInt("0"))).getClass().hashCode(), true);
-        m.put(((Object) (Long.parseLong("0"))).getClass().hashCode(), true);
-        m.put(((Object) (Float.parseFloat("0"))).getClass().hashCode(), true);
-        m.put(((Object) (Double.parseDouble("0"))).getClass().hashCode(), true);
-    }
-
-    JsonNumber() {
+    JsonNumber(boolean isFloat) {
         type = Types.Num;
+        this.isfloat = isFloat;
     }
 
-    private void cn() {
-        if (value == null) {
-            throw new ValueException();
-        }
+    JsonNumber(long val) {
+        type = Types.Num;
+        value = val;
     }
 
-    public short getShort() {
-        cn();
-        return (short) (value);
+    JsonNumber(double val) {
+        type = Types.Num;
+        value = val;
+        isfloat = true;
     }
 
-    public int getInt() {
-        cn();
-        return (int) (value);
+    public boolean isFloat() {
+        return isfloat;
     }
 
     public long getLong() {
-        cn();
+        notNullValue();
         return (long) (value);
     }
 
-    public float getFloat() {
-        cn();
-        return (float) (value);
-    }
-
     public double getDouble() {
-        cn();
+        notNullValue();
         return (double) (value);
     }
 
-    public void setValue(short val) {
-        value = val;
-    }
-
-    public void setValue(int val) {
-        value = val;
-    }
-
     public void setValue(long val) {
-        value = val;
-    }
-
-    public void setValue(float val) {
         value = val;
     }
 
@@ -68,12 +41,8 @@ public class JsonNumber extends JsonItem {
         value = val;
     }
 
-    String toStr() {
-        cn();
-        Boolean v = m.get(value.getClass().hashCode());
-        if (v == null || !v) {
-            throw new ValueException();
-        }
+    String toJson() {
+        notNullValue();
         return value.toString();
     }
 }

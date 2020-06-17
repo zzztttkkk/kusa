@@ -1,10 +1,10 @@
 import java.util.HashMap;
-import java.util.Map;
 
 @SuppressWarnings("unchecked")
 public class JsonObject extends JsonItem {
     JsonObject() {
         type = Types.Obj;
+        value = new HashMap<String, JsonItem>();
     }
 
     public void put(String key, JsonItem item) {
@@ -21,5 +21,9 @@ public class JsonObject extends JsonItem {
 
     public JsonItem remove(String key) {
         return ((HashMap<String, JsonItem>) (value)).remove(key);
+    }
+
+    public void clear() {
+        expose().clear();
     }
 }
