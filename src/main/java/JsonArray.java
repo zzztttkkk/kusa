@@ -1,25 +1,39 @@
 import java.util.ArrayList;
 
-@SuppressWarnings("unchecked")
 public class JsonArray extends JsonItem {
-    public JsonArray() {
-        type = Types.Ary;
-        value = new ArrayList<JsonItem>();
-    }
+	public JsonArray() {
+		type = Types.Ary;
+		value = null;
+	}
 
-    public void add(JsonItem item) {
-        ((ArrayList<JsonItem>) (value)).add(item);
-    }
+	public int size() {
+		if (value == null) {
+			return -1;
+		}
+		return expose().size();
+	}
 
-    public ArrayList<JsonItem> expose() {
-        return ((ArrayList<JsonItem>) (value));
-    }
+	public void add(JsonItem item) {
+		if (value == null) {
+			value = new ArrayList<JsonItem>();
+		}
+		expose().add(item);
+	}
 
-    public JsonItem get(int index) {
-        return ((ArrayList<JsonItem>) (value)).get(index);
-    }
+	public ArrayList<JsonItem> expose() {
+		//noinspection unchecked
+		return (ArrayList<JsonItem>) (value);
+	}
 
-    public JsonItem remove(int index) {
-        return ((ArrayList<JsonItem>) (value)).remove(index);
-    }
+	public JsonItem get(int index) {
+		if (value == null) {
+			return null;
+		}
+		return expose().get(index);
+	}
+
+	public JsonItem remove(int index) {
+		notNullValue();
+		return expose().remove(index);
+	}
 }

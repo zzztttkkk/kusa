@@ -1,6 +1,5 @@
 import java.util.Date;
 
-@JsonReflectSafe
 public class User extends Animal {
     private String name;
     @JsonAlias("-")

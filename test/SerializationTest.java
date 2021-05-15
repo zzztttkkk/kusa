@@ -1,7 +1,7 @@
 public class SerializationTest {
     @org.junit.jupiter.api.Test
     void getFans() {
-        for (Fan field : reflect.getFields(User.class)) {
+        for (FieldInfo field : reflect.getFieldInfos(User.class)) {
             System.out.println(field.getKey());
         }
     }

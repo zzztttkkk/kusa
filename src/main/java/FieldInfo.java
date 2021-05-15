@@ -2,13 +2,13 @@ import exceptions.FieldException;
 
 import java.lang.reflect.Field;
 
-class Fan {
+class FieldInfo {
     Field raw;
     String name;
     String alias;
     String clsName;
 
-    Fan(Field field) {
+    FieldInfo(Field field) {
         raw = field;
         name = field.getName();
         alias = "";

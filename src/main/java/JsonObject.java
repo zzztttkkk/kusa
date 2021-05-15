@@ -1,29 +1,46 @@
 import java.util.HashMap;
 
-@SuppressWarnings("unchecked")
 public class JsonObject extends JsonItem {
-    JsonObject() {
-        type = Types.Obj;
-        value = new HashMap<String, JsonItem>();
-    }
+	JsonObject() {
+		type = Types.Obj;
+		value = null;
+	}
 
-    public void put(String key, JsonItem item) {
-        ((HashMap<String, JsonItem>) (value)).put(key, item);
-    }
+	public int size() {
+		if (value == null) {
+			return -1;
+		}
+		return expose().size();
+	}
 
-    public JsonItem get(String key) {
-        return ((HashMap<String, JsonItem>) (value)).get(key);
-    }
+	public void put(String key, JsonItem item) {
+		if (value == null) {
+			value = new HashMap<String, JsonItem>();
+		}
+		expose().put(key, item);
+	}
 
-    public HashMap<String, JsonItem> expose() {
-        return ((HashMap<String, JsonItem>) (value));
-    }
+	public JsonItem get(String key) {
+		if (value == null) {
+			return null;
+		}
+		return expose().get(key);
+	}
 
-    public JsonItem remove(String key) {
-        return ((HashMap<String, JsonItem>) (value)).remove(key);
-    }
+	@SuppressWarnings("unchecked")
+	public HashMap<String, JsonItem> expose() {
+		return ((HashMap<String, JsonItem>) (value));
+	}
 
-    public void clear() {
-        expose().clear();
-    }
+	public JsonItem remove(String key) {
+		notNullValue();
+		return expose().remove(key);
+	}
+
+	public void clear() {
+		if (value == null) {
+			return;
+		}
+		expose().clear();
+	}
 }
